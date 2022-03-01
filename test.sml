@@ -1,6 +1,6 @@
 printred(
     
-    Par(
+    (*Par(
         Assign(
             "a",
             Op(
@@ -17,9 +17,19 @@ printred(
                 Deref "c"
             )
         )
+    )*)
+
+    Await(
+        Op(
+            Deref "c",
+            mu,
+            Integer 1
+        ),
+        Assign(
+            "a",
+            Integer 10
+        )
     )
  
-
-    ,[("a",0),("b",10),("c",20)]  
+    ,[("a",0),("b",10),("c",1)]  
 );
-

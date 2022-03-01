@@ -20,6 +20,7 @@ datatype exp =
     |   Deref of loc 
     |   Par of exp * exp
     |   Choice of exp * exp
+    |   Await of exp * exp
 
 fun valore (Integer n) = true
   | valore (Boolean b) = true
@@ -146,6 +147,16 @@ fun red (Integer n,s) = NONE
             )
         )
     )
+    | red(Await(e1,e2),s) = (
+      case red(e1,s) of
+        SOME(Boolean(true),s') => ( (*e1 è già T/F: valuto e2*)
+          case red(e2,s') of
+          SOME(e2',s'') => SOME(Skip,s'') (*PLACEHOLDER*)
+        )
+        | SOME(e1',s') => SOME(Await(e1',e2),s') (* Devo ancora derivare e1 per arrivare a T/F*)
+        | _ => NONE
+    )
+
     
 
 
@@ -210,6 +221,11 @@ fun infertype gamma (Integer n) = SOME int
     case (infertype gamma e1, infertype gamma e2) of
       (SOME unit, SOME unit) => SOME unit
       | _ => NONE
+  )
+  | infertype gamma (Await(e1,e2)) = (
+    case(infertype gamma e1, infertype gamma e2) of
+    (SOME bool, SOME unit) => SOME unit
+    | _ => NONE
   );
 
 
@@ -243,6 +259,7 @@ fun printexp (Integer n) = Int.toString n
                                        ^ " do " ^ (printexp e2)
   | printexp (Par(e1,e2)) = "(" ^(printexp e1) ^ " || " ^ (printexp e2)^ ")"
   | printexp (Choice(e1,e2)) = "( " ^ (printexp e1) ^ " (+) " ^ (printexp e2) ^ ")"
+  | printexp (Await(e1,e2)) = "await ("^(printexp e1)^") protect ("^(printexp e2)^") end"
 
 fun printstore' [] = ""
   | printstore' ((l,n)::pairs) = l ^ "=" ^ (Int.toString n) 
