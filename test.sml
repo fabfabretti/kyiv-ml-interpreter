@@ -19,17 +19,29 @@ printred(
         )
     )*)
 
-    Await(
-        Op(
-            Deref "c",
-            mu,
-            Integer 1
-        ),
+Par(
+        
         Assign(
-            "a",
-            Integer 10
+            "a" ,
+            Op(
+                Deref "a",
+                piu,
+                Deref "c"
+            )
+        ), 
+        Await(
+            (*Op(
+                Deref "c",
+                mu,
+                Integer 1
+            )*)
+            Boolean false,
+            Assign(
+                "a",
+                Integer 10
+            )
         )
+        
     )
- 
     ,[("a",0),("b",10),("c",1)]  
 );

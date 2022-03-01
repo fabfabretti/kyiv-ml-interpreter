@@ -148,13 +148,21 @@ fun red (Integer n,s) = NONE
         )
     )
     | red(Await(e1,e2),s) = (
-      case red(e1,s) of
-        SOME(Boolean(true),s') => ( (*e1 è già T/F: valuto e2*)
-          case red(e2,s') of
-          SOME(e2',s'') => SOME(Skip,s'') (*PLACEHOLDER*)
+      let
+        fun evaluate (e,s) = case red(e,s) of
+                                SOME(e',s') => evaluate(e',s')
+                                | NONE => (e,s)
+      in
+        (
+          case evaluate(e1,s) of
+             (Boolean true,s') => (
+               case evaluate (e2,s') of
+                (Skip,s'') => SOME(Skip,s'')
+             )
+            | (Boolean false,s) => NONE
+            | _ => NONE
         )
-        | SOME(e1',s') => SOME(Await(e1',e2),s') (* Devo ancora derivare e1 per arrivare a T/F*)
-        | _ => NONE
+      end
     )
 
     
@@ -292,3 +300,15 @@ fun printred (e,s) = (TextIO.print ("      "^(printconf (e,s))) ;
                           printred' (e,s))
 
 
+(* 
+          case red(e2,s') of
+          SOME(e2',s'') => (
+            let 
+              fun evaluate (e,s) = case red (e,s) of 
+                          NONE => (e,s)
+                        | SOME (e',s') => evaluate (e',s')
+            in
+              
+
+          )
+          | _ => NONE*)
