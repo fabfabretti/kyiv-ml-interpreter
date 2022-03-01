@@ -106,9 +106,13 @@ fun red (Integer n,s) = NONE
                 case red(e1,s) of
                   SOME (e1',s') => SOME(Par(e1',e2),s')
                   | NONE => ( (*Se e1 non è derivabile devo andare dall'altro lato*)
-                    case red(e2,s) of
-                    SOME (e2',s') => SOME(Par(e1,e2'),s')
-                    | NONE => NONE
+                    case e2 of 
+                      Skip => SOME(e1,s)
+                      |_ => (
+                        case red(e2,s) of
+                          SOME(e2',s) => SOME(Par(e1,e2'),s)
+                          | NONE => NONE
+                      )
                   )
               )
           )
@@ -121,7 +125,14 @@ fun red (Integer n,s) = NONE
                   | NONE => (
                     case red(e1,s) of
                       SOME(e1',s') => SOME(Par(e1',e2),s')
-                      | NONE => NONE
+                      | _ => (
+                        case e1 of
+                        Skip => SOME(e2,s)
+                        |_ => (case red(e1,s) of
+                                SOME(e1',s) => SOME(Par(e1',e2),s)
+                                | NONE => NONE
+                        )
+                      )
                   )
               )
           )
