@@ -105,38 +105,20 @@ fun red (Integer n,s) = NONE
               |_ => (
                 case red(e1,s) of
                   SOME (e1',s') => SOME(Par(e1',e2),s')
-                  | NONE => ( (*Se e1 non è derivabile devo andare dall'altro lato*)
-                    case e2 of 
-                      Skip => SOME(e1,s)
-                      |_ => (
-                        case red(e2,s) of
-                          SOME(e2',s) => SOME(Par(e1,e2'),s)
-                          | NONE => NONE
-                      )
+                  | NONE => SOME(Par(e1,e2),s)
                   )
               )
-          )
           else (
             case e2 of
               Skip => SOME(e1,s)
               |_ => (
                 case red(e2,s) of
                   SOME (e2',s') => SOME(Par(e1,e2'),s')
-                  | NONE => (
-                    case red(e1,s) of
-                      SOME(e1',s') => SOME(Par(e1',e2),s')
-                      | _ => (
-                        case e1 of
-                        Skip => SOME(e2,s)
-                        |_ => (case red(e1,s) of
-                                SOME(e1',s) => SOME(Par(e1',e2),s)
-                                | NONE => NONE
-                        )
-                      )
+                  | NONE => SOME(Par(e1,e2),s)
                   )
               )
-          )
     )
+    
     | red(Choice(e1,e2),s) = (
       if ((Random.range(0,2) rgen) = 0)
         then (
@@ -311,3 +293,15 @@ fun printred (e,s) = (TextIO.print ("      "^(printconf (e,s))) ;
                           printred' (e,s))
 
 
+(* 
+          case red(e2,s') of
+          SOME(e2',s'') => (
+            let 
+              fun evaluate (e,s) = case red (e,s) of 
+                          NONE => (e,s)
+                        | SOME (e',s') => evaluate (e',s')
+            in
+              
+
+          )
+          | _ => NONE*)
