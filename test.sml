@@ -1,15 +1,25 @@
 printred(
-    Seq( 
-        Assign("a",Integer 1),
-        Par(
-            Assign ("a",Integer 1),
-            Choice(
-                Assign ("a",Integer 1),
-                Assign ("a",Integer 10)
+    
+    Par(
+        Assign(
+            "a",
+            Op(
+                Deref "a",
+                piu,
+                Deref "b"
             )
-           )
+        ),
+        Assign(
+            "a" ,
+            Op(
+                Deref "a",
+                piu,
+                Deref "c"
+            )
+        )
     )
  
 
-    ,[("a",0),("b",0),("res",0)]  
+    ,[("a",0),("b",10),("c",20)]  
 );
+

@@ -1,5 +1,7 @@
 load "Random";
 
+
+
 val rgen = Random.newgen();
 
 type loc = string
@@ -50,7 +52,6 @@ fun update'  front [] (l,n) = NONE
 
 fun update (s, (l,n)) = update' [] s (l,n)
 
-
 fun red (Integer n,s) = NONE
   | red (Boolean b,s) = NONE
   | red (Op (e1,opr,e2),s) = 
@@ -92,7 +93,8 @@ fun red (Integer n,s) = NONE
         Skip => SOME(e2,s)                                     
       | _ => ( case red (e1,s) of                           
                  SOME (e1',s') => SOME(Seq (e1',e2), s')       
-               | NONE => NONE ) )   
+               | NONE => NONE ) 
+    )   
   | red (Par(e1,e2),s) =
     (
       if ((Random.range(0,2) rgen) = 0) 
@@ -157,7 +159,8 @@ fun evaluate (e,s) = case red (e,s) of
 (*   e,s -> e2,s2 ---..... *)
 
 
-datatype type_L =  int  | unit  | bool
+datatype type_L =  int  | unit  | bool | proc;
+
 
 datatype type_loc = intref
 
@@ -196,7 +199,10 @@ fun infertype gamma (Integer n) = SOME int
   | infertype gamma (Par(e1,e2))
     = (
       case (infertype gamma e1, infertype gamma e2) of
-        (SOME unit, SOME unit) => SOME unit
+        (SOME unit, SOME unit) => SOME proc
+        | (SOME unit, SOME proc) => SOME proc
+        | (SOME proc, SOME unit) => SOME proc
+        | (SOME proc, SOME proc) => SOME proc
         | _ => NONE
     )
   | infertype gamma (Choice(e1,e2))
