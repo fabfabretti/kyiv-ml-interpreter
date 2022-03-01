@@ -1,7 +1,5 @@
 load "Random";
 
-
-
 val rgen = Random.newgen();
 
 type loc = string
@@ -95,7 +93,41 @@ fun red (Integer n,s) = NONE
       | _ => ( case red (e1,s) of                           
                  SOME (e1',s') => SOME(Seq (e1',e2), s')       
                | NONE => NONE ) 
-    )   
+    )   (*
+    Faccio un po' fatica a spiegare a parole i vari IF innestati della PAR.
+                                ┌────────┐
+                va a sx     ┌───┤e1 || e2├───┐  va a dx
+                            │   └────────┘   │
+                           ┌┴┐             ┌─┴┐
+    ┌────┐  e1 = skip      │ │             │  │ e2 = skip  ┌────┐
+    │ e2 │◄────────────────┘ │             │  └────────────┤ e1 │
+    └────┘                   │             │               └────┘
+                             │             │
+             e1 not skip     │             │ e2 not skip
+                 ┌───────────┘             └───────────┐
+                 │                                     │
+                ┌┴─────┐                          ┌────┴───┐Esiste
+          Esiste│      │                          │        │  e2' ┌─────────┐
+┌───────┐   e1' │      │Non esiste      Non esiste│        └──────┤e1 || e2'│
+│e1'||e2│◄──────┘      │ e1'                   e2'│               └─────────┘
+└───────┘              │                          │
+              Non posso svolgere         Non posso svolgere
+               a sinistra; vado           a sinistra; vado
+                   a destra                   a destra
+                       │                          │
+  ┌──┐  e2  = skip ┌───┴─┐                      ┌─┴───┐e1=skip ┌──┐
+  │e1│◄────────────┘     │e2 not                │     └────────┤e2│
+  └──┘                   │ skip                 │              └──┘
+                 ┌───────┘                      └───────┐
+                 │                                      │
+     Esiste┌─────┴─┐                       e1' non  ┌───┴───────┐
+       e2' │       │ e2' non esiste        esiste e │           │ e1'
+    ┌──────┘   ┌───┴───┐ e non è skip         non è │           │ esiste
+    │          │bottom │ (es. aw false)        skip │        ┌──┴───────┐
+┌───┴─────┐    └───────┘                        ┌───┴───┐    │e1' || e2 │
+│e1 || e2'│                                     │bottom │    └──────────┘
+└─────────┘                                     └───────┘
+    *)
   | red (Par(e1,e2),s) =
     (
       if ((Random.range(0,2) rgen) = 0) 
@@ -118,7 +150,6 @@ fun red (Integer n,s) = NONE
                   )
               )
     )
-    
     | red(Choice(e1,e2),s) = (
       if ((Random.range(0,2) rgen) = 0)
         then (

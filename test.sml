@@ -49,7 +49,7 @@ printred(
 print("============================================================\n");
 
 
-print("===========================================================\n|| TEST : [c:=!a || c:=!b]\n|| Mi aspetto concluda correttamente, facendo uno solo dei due rami.\nVV\n");
+print("===========================================================\n|| TEST : [c:=!a (+) c:=!b]\n|| Mi aspetto concluda correttamente, facendo uno solo dei due rami.\nVV\n");
 printred(
     Choice(  
         Assign(
@@ -146,7 +146,7 @@ printred(
 );
 print("============================================================\n");
 
-print("===========================================================\n|| TEST : [await true (+) await false]\n|| Mi aspetto svolga il ramo true.\nVV\n");
+print("===========================================================\n|| TEST : [await true (+) await false]\n|| Mi aspetto svolga il ramo true, terminando in value.\nVV\n");
 printred(
     Choice(  
         
@@ -157,7 +157,14 @@ printred(
         
         Await(
             Boolean true,
-            Skip       
+            Assign(
+                "c",
+                Op(
+                    Integer 40,
+                    piu,
+                    Integer 20
+                )
+            )       
         )
     )
     ,[("a",1),("b",2),("c",3)]  
