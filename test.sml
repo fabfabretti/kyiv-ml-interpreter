@@ -8,6 +8,7 @@
 (* Test CHOICE FRA DUE EXP COMPLESSE - c:=!a+10 (+) c:=!a+10*)
 (* Test AWAIT CON EXP COMPLESSA - await true protect (tanti passi) end*)
 (* Test CHOICE FRA DUE AWAIT FALSE - await false protect skip end (+) await false protect skip end *)
+(* Tests INFERTYPE SU NON TIPABILE *)
 *)
 
 
@@ -383,8 +384,6 @@ printred(
     ,[("a",1),("b",2),("c",3)]  
 );
 
-
-
 (*
 -- TEMPLATE DEI TEST --
 
@@ -411,3 +410,70 @@ printred(
 
 
 *)
+
+
+
+(* Tests INFERTYPE SU NON TIPABILE*)
+
+print("===========================================================\n"^
+      "|| Test TYPECHECK || \n   Mi aspetto che i seguenti casi non siano tipabili.                        ");
+
+print("\n===[10||10]===                 ");
+infertype [] (
+        Par(
+            Integer 10,
+            Integer 10
+        )
+    );
+
+print("\n===[skip||10]===                 ");
+infertype [] (
+        Par(
+            Skip,
+            Integer 10
+        )
+    );
+
+print("\n===[true||skip]===                 ");
+infertype [] (
+        Par(
+            Boolean true,
+            Skip
+        )
+    );
+
+print("\n===[skip(+)10]===                 ");
+infertype [] (
+        Choice(
+            Skip,
+            Integer 10
+        )
+    );
+
+
+print("\n===[true(+)skip]===                 ");
+infertype [] (
+        Choice(
+            Boolean true,
+            Skip
+        )
+    );
+
+
+print("\n===[await 10 protect skip end]===                 ");
+infertype [] (
+        Await(
+            Integer 10,
+            Skip
+        )
+    );
+
+print("\n===[await true protect 10 end]===                 ");
+infertype [] (
+        Await(
+            Boolean true,
+            Integer 10
+        )
+    );
+
+

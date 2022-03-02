@@ -180,7 +180,7 @@ esiste│              │ e non è skip          e non è skip│           │
                       )
                   )
               )
-          )
+         
           else (
             case e2 of
               Skip => SOME(e1,s)
