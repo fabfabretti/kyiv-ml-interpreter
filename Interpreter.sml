@@ -15,7 +15,7 @@ datatype exp =
     |   If of exp * exp * exp
     |   Assign of loc * exp
     |   Skip 
-    |   Seq of exp * exp (*e1;e2*)
+    |   Seq of exp * exp
     |   While of exp * exp
     |   Deref of loc 
     |   Par of exp * exp
