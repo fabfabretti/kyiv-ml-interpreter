@@ -305,7 +305,7 @@ printred(
 (* Test CHOICE FRA DUE AWAIT FALSE - await false protect skip end (+) await false protect skip end *)
 
 print("===========================================================\n||"^
-      " ===[wait false protect skip end (+) await false protect skip end]===\n||\n"^
+      " ===[await false protect skip end (+) await false protect skip end]===\n||\n"^
       "|| Test CHOICE FRA DUE AWAIT FALSE\n||   Mi aspetto che rimanga bloccato.\n"^
       "||   Mi aspetto che il tipo sia unit.                        ");
 print("||\n||--- TYPE CHECKER ---                                                ");
