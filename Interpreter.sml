@@ -97,38 +97,38 @@ fun red (Integer n,s) = NONE
                | NONE => NONE ) 
     )  
 (*
-                                ┌────────┐
-                va a sx     ┌───┤e1 || e2├───┐  va a dx
-                            │   └────────┘   │
-                           ┌┴┐             ┌─┴┐
-    ┌────┐  e1 = skip      │ │             │  │ e2 = skip  ┌────┐
-    │ e2 │◄────────────────┘ │             │  └────────────┤ e1 │
-    └────┘                   │             │               └────┘
-                             │             │
-             e1 not skip     │             │ e2 not skip
-                 ┌───────────┘             └───────────┐
-                 │                                     │
-                ┌┴─────┐                          ┌────┴───┐Esiste
-          Esiste│      │                          │        │  e2' ┌─────────┐
-┌───────┐   e1' │      │Non esiste      Non esiste│        └──────┤e1 || e2'│
-│e1'||e2│◄──────┘      │ e1'                   e2'│               └─────────┘
-└───────┘              │                          │
-              Non posso svolgere         Non posso svolgere
-               a sinistra; vado           a destra; vado
-                   a destra                   a sinistra
-                       │                          │
-  ┌──┐  e2  = skip ┌───┴─┐                      ┌─┴───┐e1=skip ┌──┐
-  │e1│◄────────────┘     │e2 not                │     └────────┤e2│
-  └──┘                   │ skip                 │              └──┘
-                 ┌───────┘                      └───────┐
-                 │                                      │
-     Esiste┌─────┴─┐                       e1' non  ┌───┴───────┐
-       e2' │       │ e2' non esiste        esiste e │           │ e1'
-    ┌──────┘   ┌───┴───┐ e non è skip         non è │           │ esiste
-    │          │bottom │ (es. aw false)        skip │        ┌──┴───────┐
-┌───┴─────┐    └───────┘                        ┌───┴───┐    │e1' || e2 │
-│e1 || e2'│                                     │bottom │    └──────────┘
-└─────────┘                                     └───────┘*)
+                random estrae che            random estree che
+                          va a sx ┌────────┐ va a dx
+                              ┌───┤e1 || e2├───┐
+                              │   └────────┘   │
+                             ┌┴┐             ┌─┴┐
+      ┌────┐   e1=skip       │ │             │  │  e2=skip   ┌────┐
+      │ e2 │◄────────────────┘ │             │  └───────────►│ e1 │
+      └────┘                   │             │               └────┘
+                               │             │
+                    e1 not skip│             │ e2 not skip
+                   ┌───────────┘             └───────────┐
+                   │                                     │
+                  ┌┴─────┐                          ┌────┴───┐e2'
+              e1' │      │e1'                    e2'│        │esiste
+  ┌───────┐ esiste│      │non                    non│        │      ┌─────────┐
+  │e1'||e2│◄──────┘      │esiste              esiste│        └─────►│e1 || e2'│
+  └───────┘              │                          │               └─────────┘
+                Non posso svolgere            Non posso svolgere
+                 a sinistra; vado              a destra; vado
+                     a destra                     a sinistra
+                         │                          │
+    ┌──┐   e2=skip   ┌───┴─┐                      ┌─┴───┐   e1=skip   ┌──┐
+    │e1│◄────────────┘     │e2 not          e1 not│     └────────────►│e2│
+    └──┘                   │ skip             skip│                   └──┘
+                   ┌───────┘                      └────────┐
+                   │                                       │
+   e2'┌────────────┴─┐ e2' non esiste      e1' non esiste┌─┴─────────┐e1'
+esiste│              │ e non è skip          e non è skip│           │esiste
+      ▼              ▼                                   ▼           ▼
+  ┌─────────┐    ┌───────┐                           ┌───────┐    ┌──────────┐
+  │e1 || e2'│    │bottom │   (es. await false)       │bottom │    │e1' || e2 │
+  └─────────┘    └───────┘                           └───────┘    └──────────┘*)
   | red (Par(e1,e2),s) =
     (
       if ((Random.range(0,2) rgen) = 0) 
