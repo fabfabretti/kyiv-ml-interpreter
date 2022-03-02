@@ -1,6 +1,4 @@
 load "Random";
-
-
 val rgen = Random.newgen();
 
 type loc = string
@@ -98,34 +96,7 @@ fun red (Integer n,s) = NONE (*int*)
 (*
 Decido di implementare la par nel seguente modo: se il lato che ho estratto con la monetina non è derivabile,
 provo a derivare l'altro lato. 
-
-Potenzialmente avrei anche potuto fare che, se il lato non è derivabile, sto fermo: tuttavia in questo caso se 
-avessi espressioni del tipo await false || await false mi troverei ad andare in loop infinito.
-Eventualmente, l'implementazione di questo secondo scenario sarebbe la seguente:
-  | red (Par(e1,e2),s) =
-    (
-      if ((Random.range(0,2) rgen) = 0) 
-          then (
-            case e1 of
-              Skip => SOME(e2,s)
-              |_ => (
-                case red(e1,s) of
-                  SOME (e1',s') => SOME(Par(e1',e2),s')
-                  | NONE => SOME(Par(e1,e2),s)
-                  )
-              )
-          else (
-            case e2 of
-              Skip => SOME(e1,s)
-              |_ => (
-                case red(e2,s) of
-                  SOME (e2',s') => SOME(Par(e1,e2'),s')
-                  | NONE => SOME(Par(e1,e2),s)
-                  )
-              )
-    )
-  
-  Invece, il modo in cui implemento lo scenario che ho scelto è spiegato dal seguente schema:
+Il modo in cui implemento lo scenario che ho scelto è spiegato dal seguente schema:
   (ho provato a spiegarlo a parole come ho fatto per choice e await, ma essendo innestati su molti
   livelli mi sembra più chiaro il grafo)
 
@@ -215,7 +186,7 @@ esiste│              │ e non è skip          e non è skip│           │
         )
         else ( (*Se estraggo 1 provo ad andare a destra*)
           case red(e2,s) of
-            SOME (e2',s') => SOME(e2',s') (*Se a destra è derivabile, allora butto via il lato sinistra e svolgo un passo del lato destro*)
+            SOME (e2',s') => SOME(e2',s') (*Se a destra è derivabile, allora butto via il lato sinistro e svolgo un passo del lato destro*)
             | NONE =>(
               case red(e1,s) of (*Se a destra NON è derivabile, allora provo a derivare a sinistra*)
                 SOME(e1',s') => SOME (e1',s') (*Se a sinistra è derivabile, butto via il lato destro e faccio un passo a sinistra*)
@@ -226,7 +197,7 @@ esiste│              │ e non è skip          e non è skip│           │
     | red(Await(e1,e2),s) = (
       let
         fun evaluate (e,s) = case red(e,s) of (*Mi servirebbe la big step per ottenere il risultato in un passo, ma è definita in seguito 
-        e usa la red quindi non posso dichiararla prima). Dunque me la ridefinisco qui.*)
+        (e usa la red, quindi non posso dichiararla prima). Dunque me la ridefinisco qui.*)
                                 SOME(e',s') => evaluate(e',s')
                                 | NONE => (e,s)
       in
@@ -237,13 +208,11 @@ esiste│              │ e non è skip          e non è skip│           │
                 (Skip,s'') => SOME(Skip,s'')
                 | _ => NONE
              )
-            | (Boolean false,s') => NONE (*Se è falsa sto fermo: non ho alcuna derivazione possibile.*)
+            | (Boolean false,s') => NONE (*Se è falsa sto fermo: non ho alcuna derivazione possibile. (è ridondante, ma per chiarezza lo lascio)*)
             | _ => NONE 
         )
       end
     )
-
-    
 
 
 
