@@ -1,7 +1,6 @@
 load "Random";
 
 
-
 val rgen = Random.newgen();
 
 type loc = string
@@ -53,8 +52,8 @@ fun update'  front [] (l,n) = NONE
 
 fun update (s, (l,n)) = update' [] s (l,n)
 
-fun red (Integer n,s) = NONE
-  | red (Boolean b,s) = NONE
+fun red (Integer n,s) = NONE (*int*)
+  | red (Boolean b,s) = NONE (*bool*)
   | red (Op (e1,opr,e2),s) = 
     (case (e1,opr,e2) of
          (Integer x1, piu, Integer x2) => SOME(Integer (x1+x2), s)   (*op+*)
@@ -77,26 +76,59 @@ fun red (Integer n,s) = NONE
                  | NONE => NONE ))
   | red (Deref l,s) = 
     (case lookup  (s,l) of                
-          SOME n => SOME(Integer n,s)                          
+          SOME n => SOME(Integer n,s)      (*deref*)                    
         | NONE => NONE )                  
   | red (Assign (l,e),s) =                                  
     (case e of                                                 
-         Integer n => (case update (s,(l,n)) of 
+         Integer n => (case update (s,(l,n)) of  (*assign1*)
                            SOME s' => SOME(Skip, s')           
                          | NONE => NONE)                                   
        | _ => (case red (e,s) of                           
-                   SOME (e',s') => SOME(Assign (l,e'), s')    
+                   SOME (e',s') => SOME(Assign (l,e'), s')   (*assign2*) 
                  | NONE => NONE  ) )                          
   | red (While (e1,e2),s) = SOME( If(e1,Seq(e2,While(e1,e2)),Skip),s) (* (while) *)
-  | red (Skip,s) = NONE                                     
+  | red (Skip,s) = NONE   (*skip*)                                  
   | red (Seq (e1,e2),s) =                                   
     (case e1 of                                                 
-        Skip => SOME(e2,s)                                     
+        Skip => SOME(e2,s)      (*seq.skip*)                               
       | _ => ( case red (e1,s) of                           
-                 SOME (e1',s') => SOME(Seq (e1',e2), s')       
+                 SOME (e1',s') => SOME(Seq (e1',e2), s') (*seq*)      
                | NONE => NONE ) 
     )  
 (*
+Decido di implementare la par nel seguente modo: se il lato che ho estratto con la monetina non è derivabile,
+provo a derivare l'altro lato. 
+
+Potenzialmente avrei anche potuto fare che, se il lato non è derivabile, sto fermo: tuttavia in questo caso se 
+avessi espressioni del tipo await false || await false mi troverei ad andare in loop infinito.
+Eventualmente, l'implementazione di questo secondo scenario sarebbe la seguente:
+  | red (Par(e1,e2),s) =
+    (
+      if ((Random.range(0,2) rgen) = 0) 
+          then (
+            case e1 of
+              Skip => SOME(e2,s)
+              |_ => (
+                case red(e1,s) of
+                  SOME (e1',s') => SOME(Par(e1',e2),s')
+                  | NONE => SOME(Par(e1,e2),s)
+                  )
+              )
+          else (
+            case e2 of
+              Skip => SOME(e1,s)
+              |_ => (
+                case red(e2,s) of
+                  SOME (e2',s') => SOME(Par(e1,e2'),s')
+                  | NONE => SOME(Par(e1,e2),s)
+                  )
+              )
+    )
+  
+  Invece, il modo in cui implemento lo scenario che ho scelto è spiegato dal seguente schema:
+  (ho provato a spiegarlo a parole come ho fatto per choice e await, ma essendo innestati su molti
+  livelli mi sembra più chiaro il grafo)
+
                 random estrae che            random estree che
                           va a sx ┌────────┐ va a dx
                               ┌───┤e1 || e2├───┐
@@ -138,7 +170,7 @@ esiste│              │ e non è skip          e non è skip│           │
               |_ => (
                 case red(e1,s) of
                   SOME (e1',s') => SOME(Par(e1',e2),s')
-                  | NONE => ( (*Se e1 non è derivabile devo andare dall'altro lato*)
+                  | NONE => 
                     case e2 of 
                       Skip => SOME(e1,s)
                       |_ => (
@@ -172,40 +204,41 @@ esiste│              │ e non è skip          e non è skip│           │
     )
     | red(Choice(e1,e2),s) = (
       if ((Random.range(0,2) rgen) = 0)
-        then (
+        then ( (* Se estraggo 0 provo ad andare a sinistra *)
           case red(e1,s) of
-            SOME(e1',s') => SOME (e1',s')
+            SOME(e1',s') => SOME (e1',s') (*Se a sinistra è derivabile, allora butto via il lato destro e svolgo un passo del lato sinistro*)
             | NONE => (
-              case red(e2,s) of
-                SOME (e2',s') => SOME (e2',s')
-                | NONE => NONE
+              case red(e2,s) of (*Se a sinistra NON è derivabile, allora provo a derivare a destra*)
+                SOME (e2',s') => SOME (e2',s') (* Se a destra è derivabile butto via il lato sinistro e faccio un passo a destra*)
+                | NONE => NONE (*Altrimenti è bloccato. *)
             )
         )
-        else (
+        else ( (*Se estraggo 1 provo ad andare a destra*)
           case red(e2,s) of
-            SOME (e2',s') => SOME(e2',s')
+            SOME (e2',s') => SOME(e2',s') (*Se a destra è derivabile, allora butto via il lato sinistra e svolgo un passo del lato destro*)
             | NONE =>(
-              case red(e1,s) of
-                SOME(e1',s') => SOME (e1',s')
-                | NONE => NONE
+              case red(e1,s) of (*Se a destra NON è derivabile, allora provo a derivare a sinistra*)
+                SOME(e1',s') => SOME (e1',s') (*Se a sinistra è derivabile, butto via il lato destro e faccio un passo a sinistra*)
+                | NONE => NONE (*Altrimenti è bloccato. *)
             )
         )
     )
     | red(Await(e1,e2),s) = (
       let
-        fun evaluate (e,s) = case red(e,s) of
+        fun evaluate (e,s) = case red(e,s) of (*Mi servirebbe la big step per ottenere il risultato in un passo, ma è definita in seguito 
+        e usa la red quindi non posso dichiararla prima). Dunque me la ridefinisco qui.*)
                                 SOME(e',s') => evaluate(e',s')
                                 | NONE => (e,s)
       in
         (
-          case evaluate(e1,s) of
-             (Boolean true,s') => (
+          case evaluate(e1,s) of (*Svolgo in un passo tutta la condizione per vedere se è vera o falsa.*)
+             (Boolean true,s') => ( (* Se è vera, allora svolgo tutto il corpo e ritorno Skip *)
                case evaluate (e2,s') of
                 (Skip,s'') => SOME(Skip,s'')
                 | _ => NONE
              )
-            | (Boolean false,s') => NONE
-            | _ => NONE
+            | (Boolean false,s') => NONE (*Se è falsa sto fermo: non ho alcuna derivazione possibile.*)
+            | _ => NONE 
         )
       end
     )
@@ -223,7 +256,7 @@ fun evaluate (e,s) = case red (e,s) of
 (*   e,s -> e2,s2 ---..... *)
 
 
-datatype type_L =  int  | unit  | bool | proc;
+datatype type_L =  int  | unit  | bool | proc; (*aggiungo proc per gestire il tipo della PAR*)
 
 
 datatype type_loc = intref
@@ -266,7 +299,7 @@ fun infertype gamma (Integer n) = SOME int
         (SOME unit, SOME unit) => SOME proc
         | (SOME unit, SOME proc) => SOME proc
         | (SOME proc, SOME unit) => SOME proc
-        | (SOME proc, SOME proc) => SOME proc
+        | (SOME proc, SOME proc) => SOME proc (*Dalle regole, e1 ed e2 possono essere qualunque combinazione di unit e proc*)
         | _ => NONE
     )
   | infertype gamma (Choice(e1,e2))
@@ -285,11 +318,6 @@ fun infertype gamma (Integer n) = SOME int
 load "Listsort";
 load "Int";
 load "Bool";
-
-(*1+2
-e1 ; ife1then
-load "Int"
-load "Listsort"  *)
 
 
 fun printop piu = "+"
