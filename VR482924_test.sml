@@ -6,8 +6,9 @@
 (* Test CHOICE FRA DUE VALORI skip (+) skip*)
 (* Test CHOICE FRA DUE EXP SEMPLICI - c:=10 (+) c:=10*)
 (* Test CHOICE FRA DUE EXP COMPLESSE - c:=!a+10 (+) c:=!a+10*)
-(* Test AWAIT CON EXP COMPLESSA - await true protect (tanti passi) end*)
 (* Test CHOICE FRA DUE AWAIT FALSE - await false protect skip end (+) await false protect skip end *)
+(* Test AWAIT CON EXP COMPLESSA - await true protect (tanti passi) end *)
+
 (* Tests INFERTYPE SU NON TIPABILE *)
 *)
 

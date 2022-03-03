@@ -97,8 +97,8 @@ fun red (Integer n,s) = NONE (*int*)
 Decido di implementare la par nel seguente modo: se il lato che ho estratto con la monetina non è derivabile,
 provo a derivare l'altro lato. 
 Il modo in cui implemento lo scenario che ho scelto è spiegato dal seguente schema:
-  (ho provato a spiegarlo a parole come ho fatto per choice e await, ma essendo innestati su molti
-  livelli mi sembra più chiaro il grafo)
+  (ho provato a spiegarlo a parole come ho fatto per choice e await, ma essendo innestato su molti
+  livelli mi sembra più chiaro il grafo...)
 
                 random estrae che            random estree che
                           va a sx ┌────────┐ va a dx
@@ -130,7 +130,7 @@ Il modo in cui implemento lo scenario che ho scelto è spiegato dal seguente sch
 esiste│              │ e non è skip          e non è skip│           │esiste
       ▼              ▼                                   ▼           ▼
   ┌─────────┐    ┌───────┐                           ┌───────┐    ┌──────────┐
-  │e1 || e2'│    │bottom │   (es. await false)       │bottom │    │e1' || e2 │
+  │e1 || e2'│    │bottom │ -> (es. await false) <-   │bottom │    │e1' || e2 │
   └─────────┘    └───────┘                           └───────┘    └──────────┘*)
   | red (Par(e1,e2),s) =
     (
